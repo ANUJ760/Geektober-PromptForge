@@ -12,7 +12,7 @@ import connectDB from './utils/connectDB.js'
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://test-smp-i9l5.vercel.app/",
     credentials: true
 }));
 app.use(express.json());
