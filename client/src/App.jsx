@@ -3,7 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Home from './pages/Home.jsx';
 import Login from './pages/Login.jsx';
 import Signup from './pages/Signup.jsx';
-import LogOut from './pages/LogOut.jsx';
+import LogOut from './pages/Logout.jsx';
 import Prompt from './pages/Prompt.jsx';
 import Explore from './pages/Explore.jsx';
 import checkAuthStatus  from './utils/checkAuthStatus.js';
