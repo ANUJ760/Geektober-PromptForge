@@ -1,5 +1,5 @@
 const checkAuthStatus = async (setIsLoggedIn) => {
-    const response = await fetch('http://localhost:3000/users/verify', {
+    const response = await fetch(`${import.meta.env.API_URL}/users/verify`, {
         method: 'GET',
         credentials: 'include', 
         headers: {

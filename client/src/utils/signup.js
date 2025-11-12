@@ -7,7 +7,7 @@ export default async function handleSignup(event, navigate, setIsLoggedIn, setEr
     const username = formData.get('username');
 
     try {
-        const response = await fetch('http://localhost:3000/users/signup', {
+        const response = await fetch(`${import.meta.env.API_URL}/users/signup`, {
             method: 'POST',
             credentials: 'include', 
             headers: {
@@ -19,8 +19,6 @@ export default async function handleSignup(event, navigate, setIsLoggedIn, setEr
         if (response.ok) {
             setIsLoggedIn(true);
             navigate('/home'); 
-        } else {
-            const message = 'Signup failed. Please try again.';
         }
     } catch (error) {
         console.error("Network error during signup:", error);
