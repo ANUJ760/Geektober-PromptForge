@@ -1,7 +1,7 @@
 export default async function addUser(event) {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const response = await fetch(`${import.meta.env.API_URL}/users/logout`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/users/logout`, {
             method: 'POST',
             credentials: "include",
             headers: {

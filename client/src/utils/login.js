@@ -4,7 +4,7 @@ export default async function handleLogin(event, setIsLoggedIn) {
     const formData = new FormData(event.target);
     const email = formData.get('email');
     const password = formData.get('password');
-    const response = await fetch(`${import.meta.env.API_URL}/users/login`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/users/login`, {
         method: 'POST',
         credentials: 'include',
         headers: {

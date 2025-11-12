@@ -7,7 +7,7 @@ export default async function handleSignup(event, navigate, setIsLoggedIn, setEr
     const username = formData.get('username');
 
     try {
-        const response = await fetch(`${import.meta.env.API_URL}/users/signup`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/signup`, {
             method: 'POST',
             credentials: 'include', 
             headers: {

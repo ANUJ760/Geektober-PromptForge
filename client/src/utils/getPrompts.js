@@ -1,5 +1,5 @@
 export async function getPrompts() {
-    const response = await fetch(`${import.meta.env.API_URL}/prompts/trending`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/prompts/trending`, {
         method: 'GET',
     });
     const data = await response.json();
@@ -7,7 +7,7 @@ export async function getPrompts() {
 }
 
 export async function getPromptById(id) {
-    const response = await fetch(`${import.meta.env.API_URL}/prompts/${id}`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/prompts/${id}`, {
         method: 'GET',
     });
     const data = await response.json();
@@ -15,7 +15,7 @@ export async function getPromptById(id) {
 }
 
 export async function getAllPrompts() {
-    const response = await fetch(`${import.meta.env.API_URL}/prompts/all`, {
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/prompts/all`, {
         method: 'GET',
     });
     const data = await response.json();
