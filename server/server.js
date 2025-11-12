@@ -12,7 +12,7 @@ import connectDB from './utils/connectDB.js'
 const app = express();
 const PORT = process.env.PORT || 3000;
 app.use(cors({
-    origin: "https://test-smp-rtfl.vercel.app",
+    origin: "*",
     credentials: true
 }));
 app.use(express.json());
