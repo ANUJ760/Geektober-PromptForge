@@ -1,8 +1,10 @@
 import Card from './Card';
 import { getPrompts } from '../utils/getPrompts';
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const GallerySection = ({isLoggedIn}) => {
+  const navigate = useNavigate();
   const [imageData, setImageData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
@@ -20,6 +22,10 @@ const GallerySection = ({isLoggedIn}) => {
 
     fetchData();
   }, []);
+
+  function handleClick() {
+    navigate('/explore');
+  }
 
   const isDataValid = Array.isArray(imageData) && imageData.length > 0;
   if (isLoading) {
@@ -63,7 +69,7 @@ const GallerySection = ({isLoggedIn}) => {
         )}
       </div>
       <div className='flex justify-center'>
-        <button className="bg-gray-800 text-l rounded-4xl pl-4 pr-4 pt-2 pb-2 mt-12 text-white border-2 border-white hover:bg-gray-700">Explore Trending Prompts</button>
+        <button onClick={handleClick} className="bg-gray-800 text-l rounded-4xl pl-4 pr-4 pt-2 pb-2 mt-12 text-white border-2 border-white hover:bg-gray-700">Explore Trending Prompts</button>
       </div>
     </div>
   );

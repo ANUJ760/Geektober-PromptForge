@@ -29,7 +29,9 @@ const GallerySection = ({isLoggedIn}) => {
       </div>
     );
   }
-
+  function handleClick () {
+    alert("End of Page")
+  }
   return (
     <div className="bg-[#0c1121] min-h-screen py-16 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto text-center mb-12">
@@ -63,7 +65,7 @@ const GallerySection = ({isLoggedIn}) => {
         )}
       </div>
       <div className='flex justify-center'>
-        <button className="bg-gray-800 text-l rounded-4xl pl-4 pr-4 pt-2 pb-2 mt-12 text-white border-2 border-white hover:bg-gray-700">Explore Trending Prompts</button>
+        <button onClick={handleClick} className="bg-gray-800 text-l rounded-4xl pl-4 pr-4 pt-2 pb-2 mt-12 text-white border-2 border-white hover:bg-gray-700">View More</button>
       </div>
     </div>
   );
