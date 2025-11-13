@@ -1,21 +1,46 @@
 import { Heart, Copy, Share2, CornerUpLeft } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 
 const Prompt = (props) => {
   const navigate = useNavigate();
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(props.promptText);
+      toast.success("Copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: "StealMyPrompts",
+          text: "Check out this cool Prompt!",
+          url: window.location.href,
+        });
+        console.log("Shared successfully!");
+      } catch (err) {
+        console.error("Share failed:", err);
+      }
+    } else {
+      alert("Sharing not supported on this browser.");
+    }
+  };
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 sm:p-8">
       <div className="w-full max-w-6xl flex flex-col lg:flex-row bg-[#1a1a2e] rounded-xl shadow-2xl overflow-hidden">
         <div className="relative lg:w-3/5 bg-gray-800 flex flex-col p-4">
           <button
             className="absolute top-4 left-4 text-white text-sm font-semibold flex items-center space-x-1 hover:text-gray-300 transition"
-            onClick={() => navigate('/')}
+            onClick={() => navigate(-1)}
           >
             <CornerUpLeft size={16} />
             <span>Back to gallery</span>
           </button>
-          <div className="flex-grow flex items-center justify-center pt-10 pb-4">
-            <div className={`w-full max-w-lg aspect-[4/5] rounded-xl overflow-hidden shadow-2xl border border-gray-700 ${!props.imageSrc ? 'bg-gray-700 flex items-center justify-center text-white' : ''}`}>
+          <div className="grow flex items-center justify-center pt-10 pb-4">
+            <div className={`w-full max-w-lg aspect-4/5 rounded-xl overflow-hidden shadow-2xl border border-gray-700 ${!props.imageSrc ? 'bg-gray-700 flex items-center justify-center text-white' : ''}`}>
               {props.imageSrc ? (
                 <img
                   src={props.imageSrc}
@@ -48,7 +73,7 @@ const Prompt = (props) => {
             </p>
           </div>
 
-          <div className="flex-grow mb-6">
+          <div className="mb-2">
             <h2 className="text-sm uppercase font-bold text-white mb-3 tracking-wider">
               PROMPT
             </h2>
@@ -59,23 +84,26 @@ const Prompt = (props) => {
             </div>
             
             <div className="flex items-center space-x-3 mt-5">
-              <button className="flex items-center space-x-2 px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">
+              <button onClick={handleCopy} className="flex items-center space-x-2 px-4 py-2 bg-gray-700 text-white text-sm rounded-lg hover:bg-gray-600 transition">
                 <Copy size={16} />
                 <span>Copy</span>
+                <Toaster position="top-center" />
               </button>
+              <a href='https://gemini.google.com/' target='blank'>
               <button className="px-4 py-2 bg-blue-500 text-white text-sm font-semibold rounded-lg hover:bg-blue-400 transition shadow-lg shadow-blue-500/50">
                 Try this
               </button>
+              </a>
             </div>
           </div>
 
-          <div className="border-t border-gray-700 pt-4 flex items-center justify-between">
+          <div className="pt-2 flex items-center justify-between">
             <div className="flex items-center space-x-1 text-gray-400">
               <Heart size={20} className="text-red-500 fill-red-500" />
               <span className="text-lg font-semibold text-white">{props.likes}</span>
               <span className="text-sm"> TOTAL LIKES</span>
             </div>
-            <button className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition">
+            <button onClick={handleShare} className="p-2 text-gray-400 hover:text-white hover:bg-gray-800 rounded-full transition">
               <Share2 size={20} />
             </button>
           </div>

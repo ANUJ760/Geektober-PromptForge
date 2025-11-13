@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom'
+import toast, { Toaster } from "react-hot-toast";
 import { Copy } from 'lucide-react';
 
 const Card = (props) => {
@@ -12,6 +13,14 @@ const Card = (props) => {
   function handleClick() {
     navigate(path);
   };
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(props.prompt);
+      toast.success("Copied to clipboard!");
+    } catch (err) {
+      console.error("Failed to copy:", err);
+    }
+  };
   return (
     <div className="bg-gray-800 rounded-2xl overflow-hidden shadow-lg border border-gray-700 w-80 flex flex-col"> 
       
@@ -21,7 +30,7 @@ const Card = (props) => {
           alt={props.category} 
           className="absolute inset-0 w-full h-full object-cover" 
         />
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black to-transparent opacity-70"></div>
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black to-transparent opacity-70"></div>
 
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center text-white z-10"> 
           <span className="bg-gray-900 bg-opacity-70 text-xs font-semibold px-3 py-1 rounded-full uppercase">
@@ -67,10 +76,11 @@ const Card = (props) => {
       </div>
 
       <div className="p-4 flex items-center justify-between bg-gray-800 border-t border-gray-700"> 
-        <button className="flex items-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+        <button onClick={handleCopy} className="flex items-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
           <Copy className="h-4 w-4 mr-2" /> 
           Copy
         </button>
+        <Toaster position="top-center" />
         <button onClick={handleClick} className="flex items-center text-white bg-gray-900 bg-opacity-70 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
           View
         </button>
