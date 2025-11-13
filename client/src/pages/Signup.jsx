@@ -12,11 +12,11 @@ const Signup = ({ setIsLoggedIn }) => {
           className="space-y-4"
         >
           <div>
-            <label className="text-sm text-gray-400">Full Name</label>
+            <label className="text-sm text-gray-400">Username</label>
             <input
               type="text"
-              name="name"
-              placeholder="Full Name"
+              name="username"
+              placeholder="Username"
               required
               className="w-full px-4 py-2 rounded-lg bg-[#1C2233] text-white border border-[#2E3A59] focus:outline-none focus:border-[#4F7FFF]"
             />

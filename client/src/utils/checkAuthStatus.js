@@ -6,11 +6,12 @@ const checkAuthStatus = async (setIsLoggedIn) => {
             'Content-Type': 'application/json',
         },
     });
-    if (response.ok) {
-        setIsLoggedIn(true);
+    const res = await response.json()
+    if (res.message==='Unauthorized' || res.message==='Invalid token') {
+        setIsLoggedIn(false);
     } 
     else {
-        setIsLoggedIn(false);
+        setIsLoggedIn(true);
     }
 };
 export default checkAuthStatus;

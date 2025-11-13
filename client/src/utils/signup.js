@@ -1,4 +1,4 @@
-export default async function handleSignup(event, navigate, setIsLoggedIn, setError) {
+export default async function handleSignup(event, setIsLoggedIn) {
     event.preventDefault();
 
     const formData = new FormData(event.target);
@@ -13,12 +13,12 @@ export default async function handleSignup(event, navigate, setIsLoggedIn, setEr
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ email, password, username }),
+            body: JSON.stringify({ username, email, password  }),
         });
 
         if (response.ok) {
             setIsLoggedIn(true);
-            navigate('/home'); 
+            window.location.href='/home'; 
         }
     } catch (error) {
         console.error("Network error during signup:", error);
