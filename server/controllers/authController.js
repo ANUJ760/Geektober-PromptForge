@@ -3,7 +3,8 @@ dotenv.config();
 
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import users from '../models/user.js'
+import Users from '../models/user.js';
+import Prompt from '../models/prompt.js';
 
 const JWT_SECRET = process.env.JWT_Secret_Key;
 
@@ -13,7 +14,7 @@ export async function signup (req, res) {
     email: req.body.email,
     password: req.body.password,
   };
-  let existingUser = await users.findOne({ email: req.body.email });
+  let existingUser = await Users.findOne({ email: req.body.email });
   if (existingUser) return res.status(400).json({ message: 'User already exists' });
 
   const hashedPassword = await bcrypt.hash(data.password, 10);
@@ -24,8 +25,8 @@ export async function signup (req, res) {
     password: hashedPassword
   };
 
-  const User= await users.insertMany(newUser);
-  const token = jwt.sign({ username: newUser.username, email: newUser.email }, JWT_SECRET, { expiresIn: '1h' });
+  const User= await Users.insertMany(newUser);
+  const token = jwt.sign({ id: newUser._id }, JWT_SECRET, { expiresIn: '1h' });
 
   res.cookie('token', token, {
     httpOnly: true,
@@ -39,18 +40,18 @@ export async function signup (req, res) {
 
 export async function login (req, res) {
   const { email, password } = req.body;
-  const user = await users.findOne({ email: email });
+  const user = await Users.findOne({ email: email });
   if (!user) return res.status(401).json({ message: 'Invalid credentials' });
 
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(401).json({ message: 'Invalid credentials' });
 
-  const token = jwt.sign({ username: user.username, email: user.email }, JWT_SECRET, { expiresIn: '1h' });
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: '1h' });
 
   res.cookie('token', token, {
     httpOnly: true,
     secure: true,
-    sameSite: 'none',
+    sameSite: 'None',
     maxAge: 3600000,
   });
 
@@ -61,11 +62,75 @@ export async function logout (req, res) {
   res.clearCookie('token', {
     httpOnly: true,
     secure: true,
-    sameSite: 'None',
+    sameSite: 'none',
   });
   res.json({ message: 'Logged out successfully' });
 }
 
-export function dashboard (req, res) {
-  res.json({ message: `Welcome ${req.user.username}` });
+export async function getUserId(req, res) {
+  res.json({id: req.user.id})
+}
+
+export async function addLike(req, res) {
+  try {
+    const promptId = req.body.promptId;
+    const userId = req.body.userId;
+    const updatedPrompt = await Prompt.findByIdAndUpdate(
+        promptId,
+        { $inc: { likes: 1 } },
+        { new: true }
+    );
+    if (!updatedPrompt) {
+        return res.status(404).json({ error: "Prompt not found" });
+    }
+    const updatedUser = await Users.findByIdAndUpdate(
+        userId,
+        { $addToSet: { likedPrompts: promptId }},
+        { new: true }
+    );
+    if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+    }
+    res.json({
+      prompt: updatedPrompt,
+    });
+  } 
+  catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function removeLike(req, res) {
+  try {
+    const promptId = req.body.promptId;
+    const userId = req.body.userId;
+    const updatedPrompt = await Prompt.findByIdAndUpdate(
+        promptId,
+        { $inc: { likes: -1 } },
+        { new: true }
+    );
+    if (!updatedPrompt) {
+        return res.status(404).json({ error: "Prompt not found" });
+    }
+    const updatedUser = await Users.findByIdAndUpdate(
+        userId,
+        { $pull: { likedPrompts: promptId }},
+        { new: true }
+    );
+    if (!updatedUser) {
+        return res.status(404).json({ error: "User not found" });
+    }
+    res.json({
+      prompt: updatedPrompt,
+    });
+  } 
+  catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}
+
+export async function likeList(req, res) {
+  const userId = req.body.userId;
+  const user = await Users.findById(userId).populate('likedPrompts');
+  res.json({ likedPrompts: user.likedPrompts });
 }

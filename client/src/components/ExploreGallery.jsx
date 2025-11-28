@@ -1,14 +1,20 @@
 import Card from './Card';
 import { getAllPrompts } from '../utils/getPrompts';
 import { useState, useEffect } from 'react';
+import { getLikeList } from '../utils/like';
 
 const GallerySection = ({isLoggedIn}) => {
   const [imageData, setImageData] = useState(null);
+  const [likedPrompts, setLikedPrompts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getAllPrompts();
+        if (isLoggedIn) {
+          const likeList = await getLikeList();
+          setLikedPrompts(likeList || []);
+        }
         setImageData(data);
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -19,7 +25,7 @@ const GallerySection = ({isLoggedIn}) => {
     };
 
     fetchData();
-  }, []);
+  }, [isLoggedIn]);
 
   const isDataValid = Array.isArray(imageData) && imageData.length > 0;
   if (isLoading) {
@@ -50,6 +56,7 @@ const GallerySection = ({isLoggedIn}) => {
             <Card 
               key={index}
               id={data._id}
+              isLiked={likedPrompts.includes(data._id)}
               imageSrc={data.imageUrl}
               prompt={data.promptText}
               likes={data.likes}

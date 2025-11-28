@@ -2,15 +2,21 @@ import Card from './Card';
 import { getPrompts } from '../utils/getPrompts';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { getLikeList } from '../utils/like';
 
 const GallerySection = ({isLoggedIn}) => {
   const navigate = useNavigate();
   const [imageData, setImageData] = useState(null);
+  const [likedPrompts, setLikedPrompts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const data = await getPrompts();
+        if (isLoggedIn) {
+          const likeList = await getLikeList();
+          setLikedPrompts(likeList || []);
+        }
         setImageData(data);
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -21,7 +27,7 @@ const GallerySection = ({isLoggedIn}) => {
     };
 
     fetchData();
-  }, []);
+  }, [isLoggedIn]);
 
   function handleClick() {
     navigate('/explore');
@@ -54,6 +60,7 @@ const GallerySection = ({isLoggedIn}) => {
             <Card 
               key={index}
               id={data._id}
+              isLiked={likedPrompts.includes(data._id)}
               imageSrc={data.imageUrl}
               prompt={data.promptText}
               likes={data.likes}

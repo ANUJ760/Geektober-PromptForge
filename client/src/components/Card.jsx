@@ -1,21 +1,49 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom'
 import toast, { Toaster } from "react-hot-toast";
 import { Copy } from 'lucide-react';
+import { updateLike } from '../utils/like';
 
 const Card = (props) => {
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(false);
-  const path = `/prompt/${props.id}`
-  function handleLikeClick() {
-    props.isLoggedIn ? setIsLiked(!isLiked) : navigate('/login');
-  };
+  const [isLiked, setIsLiked] = useState(props.isLiked);
+  const [prompt, setPromptData] = useState({...props});
+
+  useEffect(() => {
+    setIsLiked(props.isLiked);
+    setPromptData({...props});
+  }, [props]);
+
+  async function handleLikeClick() {
+    const updating = async () => {
+      try {
+        const data = await updateLike(isLiked, prompt.id);
+        setPromptData({...props, ...data.prompt});
+        setIsLiked(!isLiked);
+      }
+      catch (error) {
+        console.error("Failed to Update Like",error);
+        setPromptData({...props})
+      }
+    }
+    if (props.isLoggedIn === false) {
+      toast.error("You must be logged in to like a prompt!");
+      setTimeout(() => {
+        navigate('/login');
+      }, 1000);
+    }
+    else {
+      updating();
+    }
+  }
+
+  const path = `/prompt/${prompt.id}`
   function handleClick() {
     navigate(path);
   };
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(props.prompt);
+      await navigator.clipboard.writeText(prompt.prompt);
       toast.success("Copied to clipboard!");
     } catch (err) {
       console.error("Failed to copy:", err);
@@ -26,15 +54,15 @@ const Card = (props) => {
       
       <div className="relative pb-[100%]"> 
         <img 
-          src={props.imageSrc} 
-          alt={props.category} 
+          src={prompt.imageSrc} 
+          alt={prompt.category} 
           className="absolute inset-0 w-full h-full object-cover" 
         />
         <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black to-transparent opacity-70"></div>
 
         <div className="absolute top-4 left-4 right-4 flex justify-between items-center text-white z-10"> 
           <span className="bg-gray-900 bg-opacity-70 text-xs font-semibold px-3 py-1 rounded-full uppercase">
-            {props.category}
+            {prompt.category}
           </span>
           {isLiked ? 
             <button onClick={handleLikeClick} className="flex items-center bg-gray-900 bg-opacity-70 px-2.5 py-1 rounded-full">
@@ -48,10 +76,10 @@ const Card = (props) => {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
-            <span className="text-sm font-medium">{props.likes}</span>
-          </button>:
+            <span className="text-sm font-medium">{prompt.likes}</span>
+            </button>:
             <button onClick={handleLikeClick} className="flex items-center bg-gray-900 bg-opacity-70 px-2.5 py-1 rounded-full">
-            <svg 
+              <svg 
               xmlns="http://www.w3.org/2000/svg" 
               className="h-4 w-4 mr-1 fill-gray-500 stroke-gray-500"
               viewBox="0 0 24 24" 
@@ -61,16 +89,16 @@ const Card = (props) => {
             >
               <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
             </svg>
-            <span className="text-sm font-medium">{props.likes}</span>
+            <span className="text-sm font-medium">{prompt.likes}</span>
           </button>}
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-white z-10">
             <p className="text-base font-medium leading-tight line-clamp-4">
-                {props.prompt}
+                {prompt.prompt}
             </p>
             <button className="bg-gray-800 bg-opacity-70 text-xs font-semibold mt-1 px-3 py-1 rounded-full uppercase">
-              @{props.author}
+              @{prompt.author}
             </button>
         </div>
       </div>
