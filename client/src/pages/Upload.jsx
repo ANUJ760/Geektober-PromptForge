@@ -27,10 +27,10 @@ export default function Upload({ isLoggedIn }) {
         const result = await createPost(formData);
         if(result) {
             toast.success("Post created successfully!");
-            toast.loading("Redirecting...", { duration: 1500 });
+            toast.loading("Redirecting...Image may take a few seconds to load", { duration: 2000 });
             setTimeout(() => {
                 navigate(`/prompt/${result}`);
-            }, 1500);
+            }, 3000);
         }
     };
 
