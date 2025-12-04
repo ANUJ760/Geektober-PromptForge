@@ -1,20 +1,32 @@
 import { Link } from "react-router-dom";
 import { MoreVertical } from "lucide-react";
+import toast, { Toaster } from "react-hot-toast";
 
 const Navbar = ({isLoggedIn}) => {
+  function handleClick() {
+    if (isLoggedIn) {
+      window.location.href = '/upload';
+    } else {
+      toast.error("You must be logged in to upload a prompt!");
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+    }
+  }
   return (
     <nav className="flex items-center justify-between bg-[#0A0F1E] text-white px-6 py-3 rounded-full border border-[#ffffff] mt-6 ml-6 mr-6 shadow-md">
       <div className="flex items-center space-x-2">
         <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
         <span className="font-semibold tracking-widest text-sm">
-          BANANA PROMPTS
+          <a href="/">STEAL-MY-PROMPTS</a>
         </span>
       </div>
 
       <div className="flex items-center space-x-6 text-gray-400 text-sm">
         <a href="/" className="hover:text-white transition">Home</a>
         <a href="/explore" className="hover:text-white transition">Explore</a>
-        <a href="#" className="hover:text-white transition">Studio</a>
+        <Toaster position="top-center" />
+        <button onClick={handleClick} className="hover:text-white transition cursor-pointer">Upload</button>
       </div>
 
       <div className="flex items-center space-x-3">
