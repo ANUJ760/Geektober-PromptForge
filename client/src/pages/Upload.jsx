@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import toast, { Toaster } from "react-hot-toast";
 import createPost from "../utils/createPost.js";
 
 export default function Upload({ isLoggedIn }) {
@@ -25,7 +26,11 @@ export default function Upload({ isLoggedIn }) {
         const formData = new FormData(e.target);
         const result = await createPost(formData);
         if(result) {
-            navigate(`/prompt/${result}`);
+            toast.success("Post created successfully!");
+            toast.loading("Redirecting...", { duration: 1500 });
+            setTimeout(() => {
+                navigate(`/prompt/${result}`);
+            }, 1500);
         }
     };
 
@@ -138,7 +143,7 @@ export default function Upload({ isLoggedIn }) {
                         </div>
                     </div>
                 </div>
-
+                <Toaster position="top-center" />
                 <button
                     type="submit"
                     className="w-full mt-8 py-3 rounded-xl bg-[#5b85f9] hover:bg-[#6d92ff] font-semibold text-white transition"
