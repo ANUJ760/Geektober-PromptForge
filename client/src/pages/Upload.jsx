@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import createPost from "../utils/createPost.js";
 
 export default function Upload({ isLoggedIn }) {
+    const navigate = useNavigate();
     const [preview, setPreview] = useState(null);
 
     const handleImageChange = (e) => {
@@ -18,10 +20,13 @@ export default function Upload({ isLoggedIn }) {
         setPreview(URL.createObjectURL(file));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
-        createPost(formData);
+        const result = await createPost(formData);
+        if(result) {
+            navigate(`/prompt/${result}`);
+        }
     };
 
     if (!isLoggedIn) {

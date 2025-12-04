@@ -19,6 +19,7 @@ export async function getAllPrompts(req, res) {
 }
 
 export async function createPrompt(req, res) {
+    let promptId;
     const file = req.file;
     const { title, userID, category, description, prompt } = req.body;
     if(!file) {
@@ -27,18 +28,26 @@ export async function createPrompt(req, res) {
     if(!title || !category || !description || !prompt) {
         return res.status(400).json({ message: "All fields are required" });
     }
-    const username = await getUserName(userID);
-    const imageUrl = await getImageUrl(req.file);
-    const newPrompt = new Prompt({
-        title: title,
-        description: description,
-        category: category,
-        promptText: prompt,
-        author: username,
-        imageUrl: imageUrl,
-    });
-    newPrompt.save();   
+    try {
+        const username = await getUserName(userID);
+        const imageUrl = await getImageUrl(req.file);
+        const newPrompt = new Prompt({
+            title: title,
+            description: description,
+            category: category,
+            promptText: prompt,
+            author: username,
+            imageUrl: imageUrl,
+        });
+        await newPrompt.save();
+        const idObj = newPrompt._id;
+        promptId = idObj.toString();
+    } 
+    catch (error) {
+        return res.status(500).json({ status:500, message: "Error saving prompt", error: error.message });
+    }  
     res.status(200).json({
-        message: "Prompt created successfully",
+        status: 200,
+        promptId: promptId,
     });
 }
