@@ -32,7 +32,7 @@ const FooterComponent = () => {
               feature the most helpful breakdowns and credit every creator.
             </p>
             <a 
-              href="#" 
+              href="/upload" 
               className="text-white font-medium text-lg border-b border-white hover:text-yellow-400 hover:border-yellow-400 transition duration-200"
             >
               Submit to the gallery
