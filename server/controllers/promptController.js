@@ -18,6 +18,16 @@ export async function getAllPrompts(req, res) {
     res.json(allPrompts);
 }
 
+export async function getProfilePrompts(req, res) {
+    const { id } = req.user;
+    const username = await getUserName(id);
+    if(username === 'anonymous') {
+        return res.status(401).json({ message: "Unauthorized" });
+    }
+    const profilePrompts = await Prompt.find({author: username}).sort({ likes: -1 });
+    res.json(profilePrompts);
+}
+
 export async function createPrompt(req, res) {
     let promptId;
     const file = req.file;

@@ -8,6 +8,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.get('/trending', prompts.getTrendingPrompts);
 router.get('/all',  prompts.getAllPrompts);
 router.get('/:id',  prompts.getPromptById);
+router.get('/getProfilePrompts',  prompts.getProfilePrompts);
 router.post("/create", upload.single("image"), prompts.createPrompt);
 
 export default router;
