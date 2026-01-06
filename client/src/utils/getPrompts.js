@@ -22,7 +22,7 @@ export async function getAllPrompts() {
     return data;
 }
 
-export async function getAllPrompts() {
+export async function getProfilePrompts() {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/prompts/getProfilePrompts`, {
         method: 'GET',
     });
