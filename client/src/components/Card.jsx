@@ -1,118 +1,100 @@
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom'
-import toast, { Toaster } from "react-hot-toast";
+import { useNavigate } from 'react-router-dom';
+import toast, { Toaster } from 'react-hot-toast';
 import { Copy } from 'lucide-react';
 import { updateLike } from '../utils/like';
 
-const Card = (props) => {
+const Card = ({
+  id,
+  imageSrc,
+  prompt,
+  likes,
+  author,
+  category,
+  isLiked: initialLiked,
+  isLoggedIn,
+  onImageLoad
+}) => {
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(props.isLiked);
-  const [prompt, setPromptData] = useState({...props});
+  const [isLiked, setIsLiked] = useState(initialLiked);
+  const [likeCount, setLikeCount] = useState(likes);
 
   useEffect(() => {
-    setIsLiked(props.isLiked);
-    setPromptData({...props});
-  }, [props]);
+    setIsLiked(initialLiked);
+    setLikeCount(likes);
+  }, [initialLiked, likes]);
 
   async function handleLikeClick() {
-    const updating = async () => {
-      try {
-        const data = await updateLike(isLiked, prompt.id);
-        setPromptData({...props, ...data.prompt});
-        setIsLiked(!isLiked);
-      }
-      catch (error) {
-        console.error("Failed to Update Like",error);
-        setPromptData({...props})
-      }
+    if (!isLoggedIn) {
+      toast.error('You must be logged in to like a prompt!');
+      setTimeout(() => navigate('/login'), 1000);
+      return;
     }
-    if (props.isLoggedIn === false) {
-      toast.error("You must be logged in to like a prompt!");
-      setTimeout(() => {
-        navigate('/login');
-      }, 1000);
-    }
-    else {
-      updating();
+
+    try {
+      const data = await updateLike(isLiked, id);
+      setIsLiked(!isLiked);
+      setLikeCount(data.prompt.likes);
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  const path = `/prompt/${prompt.id}`
-  function handleClick() {
-    navigate(path);
-  };
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(prompt.prompt);
-      toast.success("Copied to clipboard!");
-    } catch (err) {
-      console.error("Failed to copy:", err);
-    }
-  };
   return (
-    <div className="bg-gray-800 rounded-2xl overflow-hidden shadow-lg border border-gray-700 w-80 flex flex-col"> 
-      
-      <div className="relative pb-[100%]"> 
-        <img 
-          src={prompt.imageSrc} 
-          alt={prompt.category} 
-          className="absolute inset-0 w-full h-full object-cover" 
+    <div className="bg-gray-800 rounded-2xl overflow-hidden shadow-lg border border-gray-700 w-80 flex flex-col">
+      {/* IMAGE (ONLY ONE) */}
+      <div className="relative aspect-square">
+        <img
+          src={imageSrc}
+          alt={category}
+          loading="lazy"
+          onLoad={onImageLoad}
+          onError={onImageLoad}
+          className="absolute inset-0 w-full h-full object-cover"
         />
-        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black to-transparent opacity-70"></div>
 
-        <div className="absolute top-4 left-4 right-4 flex justify-between items-center text-white z-10"> 
-          <span className="bg-gray-900 bg-opacity-70 text-xs font-semibold px-3 py-1 rounded-full uppercase">
-            {prompt.category}
+        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-linear-to-t from-black/80 to-transparent" />
+
+        <div className="absolute top-4 left-4 right-4 flex justify-between text-white z-10">
+          <span className="bg-black/60 text-xs px-3 py-1 rounded-full uppercase">
+            {category}
           </span>
-          {isLiked ? 
-            <button onClick={handleLikeClick} className="flex items-center bg-gray-900 bg-opacity-70 px-2.5 py-1 rounded-full">
-            <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-4 w-4 mr-1 fill-red-500 stroke-red-500"
-              viewBox="0 0 24 24" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-            <span className="text-sm font-medium">{prompt.likes}</span>
-            </button>:
-            <button onClick={handleLikeClick} className="flex items-center bg-gray-900 bg-opacity-70 px-2.5 py-1 rounded-full">
-              <svg 
-              xmlns="http://www.w3.org/2000/svg" 
-              className="h-4 w-4 mr-1 fill-gray-500 stroke-gray-500"
-              viewBox="0 0 24 24" 
-              strokeWidth="2" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-            <span className="text-sm font-medium">{prompt.likes}</span>
-          </button>}
+
+          <button
+            onClick={handleLikeClick}
+            className="flex items-center bg-black/60 px-2.5 py-1 rounded-full"
+          >
+            <span className={`mr-1 ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
+              ♥
+            </span>
+            <span className="text-sm">{likeCount}</span>
+          </button>
         </div>
 
         <div className="absolute bottom-4 left-4 right-4 text-white z-10">
-            <p className="text-base font-medium leading-tight line-clamp-4">
-                {prompt.prompt}
-            </p>
-            <button className="bg-gray-800 bg-opacity-70 text-xs font-semibold mt-1 px-3 py-1 rounded-full uppercase">
-              @{prompt.author}
-            </button>
+          <p className="text-sm line-clamp-4">{prompt}</p>
+          <span className="text-xs opacity-80">@{author}</span>
         </div>
       </div>
 
-      <div className="p-4 flex items-center justify-between bg-gray-800 border-t border-gray-700"> 
-        <button onClick={handleCopy} className="flex items-center text-white bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
-          <Copy className="h-4 w-4 mr-2" /> 
+      <div className="p-4 flex justify-between border-t border-gray-700">
+        <button
+          onClick={() => navigator.clipboard.writeText(prompt)}
+          className="bg-blue-600 px-4 py-2 rounded-lg text-sm text-white"
+        >
+          <Copy className="inline h-4 w-4 mr-1" />
           Copy
         </button>
-        <Toaster position="top-center" />
-        <button onClick={handleClick} className="flex items-center text-white bg-gray-900 bg-opacity-70 hover:bg-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+
+        <button
+          onClick={() => navigate(`/prompt/${id}`)}
+          className="bg-gray-700 px-4 py-2 rounded-lg text-sm text-white"
+        >
           View
         </button>
       </div>
+
+      <Toaster position="top-center" />
     </div>
   );
 };

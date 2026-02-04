@@ -8,7 +8,7 @@ import Prompt from '../models/prompt.js';
 
 const JWT_SECRET = process.env.JWT_Secret_Key;
 
-export async function signup (req, res) {
+export async function signup(req, res) {
   const data = {
     username: req.body.username,
     email: req.body.email,

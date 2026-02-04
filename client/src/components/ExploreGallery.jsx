@@ -1,118 +1,160 @@
 import Card from './Card';
+import SkeletonCard from './SkeletonCard';
 import { getAllPrompts } from '../utils/getPrompts';
-import { useState, useEffect } from 'react';
 import { getLikeList } from '../utils/like';
+import { useEffect, useState, useRef } from 'react';
 
 const ITEMS_PER_PAGE = 9;
+const IMAGE_LOAD_TIMEOUT = 3000;
 
-const GallerySection = ({ isLoggedIn }) => {
-  const [imageData, setImageData] = useState([]);
+const ExploreGallery = ({ isLoggedIn }) => {
+  const [data, setData] = useState([]);
   const [likedPrompts, setLikedPrompts] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
+
+  const [apiLoading, setApiLoading] = useState(true);
+  const [imagesLoading, setImagesLoading] = useState(true);
+
+  const imagesLoadedRef = useRef(0);
+  const expectedImagesRef = useRef(0);
+  const timeoutRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllPrompts();
+        setApiLoading(true);
+        setImagesLoading(true);
+
+        const prompts = await getAllPrompts();
+
         if (isLoggedIn) {
-          const likeList = await getLikeList();
-          setLikedPrompts(likeList || []);
+          setLikedPrompts(await getLikeList() || []);
         }
-        setImageData(data || []);
-      } catch (error) {
-        console.error("Failed to fetch data:", error);
-        setImageData([]);
+
+        setData(prompts || []);
+      } catch (err) {
+        console.error(err);
+        setData([]);
+        setImagesLoading(false);
       } finally {
-        setIsLoading(false);
+        setApiLoading(false);
       }
     };
 
     fetchData();
   }, [isLoggedIn]);
-  
-  const totalPages = Math.ceil(imageData.length / ITEMS_PER_PAGE);
+
+  const totalPages = Math.ceil(data.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-  const currentItems = imageData.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  const currentItems = data.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    imagesLoadedRef.current = 0;
+    expectedImagesRef.current = currentItems.length;
+    setImagesLoading(currentItems.length > 0);
+
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setImagesLoading(false);
+    }, IMAGE_LOAD_TIMEOUT);
+
+    return () => clearTimeout(timeoutRef.current);
+  }, [currentPage, data]);
+
+  const handleImageLoad = () => {
+    imagesLoadedRef.current += 1;
+
+    if (imagesLoadedRef.current >= expectedImagesRef.current) {
+      clearTimeout(timeoutRef.current);
+      setImagesLoading(false);
+    }
+  };
+
+  const isLoading = apiLoading || imagesLoading;
 
   const changePage = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="bg-[#0c1121] min-h-screen py-16 px-4 text-center text-white">
-        Loading community prompts...
-      </div>
-    );
-  }
-
   return (
     <div className="bg-[#0c1121] min-h-screen py-16 px-4 sm:px-6 lg:px-8">
+      {/* Header */}
       <div className="max-w-4xl mx-auto text-center mb-12">
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold mb-6 tracking-tight text-white">
-          See what the community is creating and loving right now.
+        <h1 className="text-4xl sm:text-5xl font-extrabold text-white mb-4">
+          Explore Community Prompts
         </h1>
-        <p className="text-lg sm:text-xl text-gray-300 leading-relaxed max-w-2xl mx-auto">
-          Every image comes with the exact prompt that created it.
+        <p className="text-lg text-gray-300">
+          Discover prompts the community is creating and loving.
         </p>
       </div>
+
+      {/* Grid */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 justify-items-center">
-        {currentItems.length > 0 ? (
-          currentItems.map((data, index) => (
-            <Card 
-              key={index}
-              id={data._id}
-              isLiked={likedPrompts.includes(data._id)}
-              imageSrc={data.imageUrl}
-              prompt={data.promptText}
-              likes={data.likes}
-              author={data.author || "Anonymous"}
-              category={data.category}
+        {isLoading ? (
+          Array.from({ length: ITEMS_PER_PAGE }).map((_, i) => (
+            <SkeletonCard key={i} />
+          ))
+        ) : currentItems.length > 0 ? (
+          currentItems.map((item) => (
+            <Card
+              key={item._id}
+              id={item._id}
+              imageSrc={item.imageUrl}
+              prompt={item.promptText}
+              likes={item.likes}
+              author={item.author || 'Anonymous'}
+              category={item.category}
+              isLiked={likedPrompts.includes(item._id)}
               isLoggedIn={isLoggedIn}
+              onImageLoad={handleImageLoad}
             />
           ))
         ) : (
-          <div className="col-span-3 text-center text-gray-400">
-            No trending prompts found right now. Check back later!
+          <div className="col-span-3 text-gray-400 text-center">
+            No prompts found.
           </div>
         )}
       </div>
 
-      <div className="flex justify-center mt-12 space-x-2">
-        <button
-          onClick={() => changePage(currentPage - 1)}
-          disabled={currentPage === 1}
-          className="px-3 py-2 bg-gray-700 text-white rounded-lg disabled:opacity-40"
-        >
-          Prev
-        </button>
-        {[...Array(totalPages)].map((_, i) => (
+      {/* Pagination */}
+      {!isLoading && totalPages > 1 && (
+        <div className="flex justify-center mt-12 space-x-2">
           <button
-            key={i}
-            onClick={() => changePage(i + 1)}
-            className={`px-3 py-2 rounded-lg ${
-              currentPage === i + 1
-                ? "bg-white text-black font-bold"
-                : "bg-gray-800 text-white hover:bg-gray-600"
-            }`}
+            onClick={() => changePage(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="px-3 py-2 bg-gray-700 text-white rounded disabled:opacity-40"
           >
-            {i + 1}
+            Prev
           </button>
-        ))}
-        <button
-          onClick={() => changePage(currentPage + 1)}
-          disabled={currentPage === totalPages}
-          className="px-3 py-2 bg-gray-700 text-white rounded-lg disabled:opacity-40"
-        >
-          Next
-        </button>
-      </div>
+
+          {[...Array(totalPages)].map((_, i) => (
+            <button
+              key={i}
+              onClick={() => changePage(i + 1)}
+              className={`px-3 py-2 rounded ${
+                currentPage === i + 1
+                  ? 'bg-white text-black font-bold'
+                  : 'bg-gray-800 text-white hover:bg-gray-600'
+              }`}
+            >
+              {i + 1}
+            </button>
+          ))}
+
+          <button
+            onClick={() => changePage(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="px-3 py-2 bg-gray-700 text-white rounded disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 };
 
-export default GallerySection;
+export default ExploreGallery;
