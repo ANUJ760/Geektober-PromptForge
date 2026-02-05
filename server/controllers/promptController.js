@@ -9,7 +9,7 @@ export async function getTrendingPrompts(req, res) {
 
 export async function getPromptById(req, res) {
     const id = req.params.id;
-    const prompt = await Prompt.findOne({ _id: id });
+    const prompt = await Prompt.findById(id);
     res.json(prompt);
 }
 

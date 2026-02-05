@@ -6,6 +6,7 @@ export default async function Upload(formData) {
     formData.append("userID", userID);
     const response = await fetch(`${import.meta.env.VITE_API_URL}/prompts/create`, {
         method: "POST",
+        credentials: 'include',
         body: formData,
     });
     const result = await response.json();

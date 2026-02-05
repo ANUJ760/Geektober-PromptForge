@@ -27,6 +27,9 @@ const Navbar = ({isLoggedIn}) => {
         <a href="/explore" className="hover:text-white transition">Explore</a>
         <Toaster position="top-center" />
         <button onClick={handleClick} className="hover:text-white transition cursor-pointer">Upload</button>
+        {
+          isLoggedIn ? <a href="/profile" className="hover:text-white transition">My Profile</a> : null
+        }
       </div>
 
       <div className="flex items-center space-x-3">

@@ -7,6 +7,7 @@ import LogOut from './pages/Logout.jsx';
 import Prompt from './pages/Prompt.jsx';
 import Explore from './pages/Explore.jsx';
 import Upload from './pages/Upload.jsx';
+import Profile from './pages/Profile.jsx';
 import checkAuthStatus  from './utils/checkAuthStatus.js';
 
 function App() {
@@ -37,6 +38,7 @@ function App() {
         <Route path="/prompt/:id" element={<Prompt isLoggedIn={isLoggedIn}/>}/>
         <Route path="/explore" element={<Explore isLoggedIn={isLoggedIn}/>}/>
         <Route path="/upload" element={<Upload isLoggedIn={isLoggedIn}/>}/>
+        <Route path="/profile" element={<Profile isLoggedIn={isLoggedIn}/>}/>
 
         <Route
           path="/home"

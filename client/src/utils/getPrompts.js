@@ -25,6 +25,7 @@ export async function getAllPrompts() {
 export async function getProfilePrompts() {
     const response = await fetch(`${import.meta.env.VITE_API_URL}/prompts/getProfilePrompts`, {
         method: 'GET',
+        credentials: 'include',
     });
     const data = await response.json();
     return data;

@@ -14,7 +14,7 @@ const GallerySection = ({ isLoggedIn }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const data = await getAllPrompts();
+        const data = await getProfilePrompts();
         if (isLoggedIn) {
           const likeList = await getLikeList();
           setLikedPrompts(likeList || []);
