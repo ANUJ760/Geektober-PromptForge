@@ -8,7 +8,16 @@ services:
     volumes:
       - mongo_data:/data/db
     networks:
-      - promptforge_net
+      promptforge_net:
+        aliases:
+          - mongo
+          - promptforge_mongo
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   redis:
     image: redis:7-alpine
@@ -19,7 +28,16 @@ services:
     volumes:
       - redis_data:/data
     networks:
-      - promptforge_net
+      promptforge_net:
+        aliases:
+          - redis
+          - promptforge_redis
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      start_period: 5s
 
   server:
     build:
@@ -43,8 +61,10 @@ services:
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
     depends_on:
-      - mongo
-      - redis
+      mongo:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     networks:
       - promptforge_net
 
