@@ -2,6 +2,7 @@ import Prompt from '../models/prompt.js';
 import Users from '../models/user.js';
 import Entitlement from '../models/entitlement.js';
 import getImageUrl from '../utils/getImageUrl.js';
+import { invalidateCache } from '../utils/redis.js';
 
 export async function getTrendingPrompts(req, res) {
   try {
@@ -223,6 +224,10 @@ export async function createPrompt(req, res) {
     });
 
     await newPrompt.save();
+
+    // Invalidate cached catalog and trending queries
+    invalidateCache('trending').catch(() => {});
+    invalidateCache('catalog').catch(() => {});
 
     // Promote user role to creator if currently buyer
     if (user.role === 'buyer') {
