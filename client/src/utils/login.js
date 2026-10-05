@@ -1,23 +1,41 @@
-export default async function handleLogin(event, setIsLoggedIn) {
-    event.preventDefault();
+import toast from 'react-hot-toast';
 
-    const formData = new FormData(event.target);
-    const email = formData.get('email');
-    const password = formData.get('password');
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/users/login`, {
-        method: 'POST',
-        credentials: 'include',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email, password }),
+export default async function handleLogin(event, setIsLoggedIn, navigate) {
+  event.preventDefault();
+
+  const formData = new FormData(event.target);
+  const email = formData.get('email');
+  const password = formData.get('password');
+  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+
+  try {
+    const response = await fetch(`${baseUrl}/users/login`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
     });
 
-    if (response.ok) {
-        setIsLoggedIn(true);
-        window.location.href='/home';
+    const data = await response.json();
+
+    if (response.ok && data.status === 'ok') {
+      setIsLoggedIn(true);
+      toast.success('Welcome back to PromptForge!');
+      if (navigate) {
+        navigate('/');
+      } else {
+        window.location.href = '/';
+      }
+      return true;
     } else {
-        const message = 'Login failed. Please check your credentials.';
-        alert(message);
+      toast.error(data.message || 'Invalid email or password');
+      return false;
     }
+  } catch (err) {
+    console.error('Login network error:', err);
+    toast.error('Network error. Please check your connection.');
+    return false;
+  }
 }

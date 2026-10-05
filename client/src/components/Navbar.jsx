@@ -1,47 +1,78 @@
-import { Link } from "react-router-dom";
-import { MoreVertical } from "lucide-react";
-import toast, { Toaster } from "react-hot-toast";
+import { Link, useNavigate } from 'react-router-dom';
+import { Sparkles } from 'lucide-react';
+import toast, { Toaster } from 'react-hot-toast';
 
-const Navbar = ({isLoggedIn}) => {
-  function handleClick() {
+const Navbar = ({ isLoggedIn }) => {
+  const navigate = useNavigate();
+
+  function handleUploadClick() {
     if (isLoggedIn) {
-      window.location.href = '/upload';
+      navigate('/upload');
     } else {
-      toast.error("You must be logged in to upload a prompt!");
+      toast.error('You must be logged in to upload a prompt!');
       setTimeout(() => {
-        window.location.href = '/login';
-      }, 1000);
+        navigate('/login');
+      }, 800);
     }
   }
+
   return (
-    <nav className="flex items-center justify-between bg-[#0A0F1E] text-white px-6 py-3 rounded-full border border-[#ffffff] mt-6 ml-6 mr-6 shadow-md">
-      <div className="flex items-center space-x-2">
-        <div className="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-        <span className="font-semibold tracking-widest text-sm">
-          <a href="/">STEAL-MY-PROMPTS</a>
-        </span>
+    <nav className="flex items-center justify-between bg-[#0A0F1E]/90 backdrop-blur-md text-white px-6 py-3.5 rounded-full border border-white/10 mt-6 mx-6 shadow-xl sticky top-6 z-50">
+      <div className="flex items-center space-x-2.5">
+        <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
+          <Sparkles size={16} className="text-white" />
+        </div>
+        <Link to="/" className="font-extrabold tracking-wider text-base bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+          PROMPTFORGE
+        </Link>
       </div>
 
-      <div className="flex items-center space-x-6 text-gray-400 text-sm">
-        <a href="/" className="hover:text-white transition">Home</a>
-        <a href="/explore" className="hover:text-white transition">Explore</a>
-        <Toaster position="top-center" />
-        <button onClick={handleClick} className="hover:text-white transition cursor-pointer">Upload</button>
-        {
-          isLoggedIn ? <a href="/profile" className="hover:text-white transition">My Profile</a> : null
-        }
+      <div className="flex items-center space-x-6 text-gray-400 text-sm font-medium">
+        <Link to="/" className="hover:text-white transition">
+          Home
+        </Link>
+        <Link to="/explore" className="hover:text-white transition">
+          Explore
+        </Link>
+        <button
+          onClick={handleUploadClick}
+          className="hover:text-white transition cursor-pointer"
+        >
+          Create
+        </button>
+        {isLoggedIn && (
+          <Link to="/profile" className="hover:text-white transition">
+            My Profile
+          </Link>
+        )}
       </div>
 
       <div className="flex items-center space-x-3">
-        {isLoggedIn ? <button className="bg-[#16203a] border border-[#737373] text-white font-semibold text-sm px-4 py-1.5 rounded-full hover:bg-[#1A2033] transition">
-          <Link to='/logout'>Logout</Link> 
-        </button> : <button className="bg-[#0F1526] border border-[#737373] text-white font-semibold text-sm px-4 py-1.5 rounded-full hover:bg-[#1A2033] transition">
-          <Link to='/login'>Login</Link> 
-        </button>}
-        <div className="w-8 h-8 flex items-center justify-center rounded-full border border-[#1C2233] cursor-pointer hover:bg-[#1A2033] transition">
-          <MoreVertical size={18} />
-        </div>
+        {isLoggedIn ? (
+          <Link
+            to="/logout"
+            className="bg-[#16203a] border border-white/10 text-white font-semibold text-sm px-4 py-1.5 rounded-full hover:bg-[#1A2033] hover:border-white/20 transition"
+          >
+            Logout
+          </Link>
+        ) : (
+          <div className="flex items-center space-x-2">
+            <Link
+              to="/login"
+              className="bg-[#0F1526] border border-white/10 text-gray-300 font-semibold text-sm px-4 py-1.5 rounded-full hover:bg-[#1A2033] hover:text-white transition"
+            >
+              Login
+            </Link>
+            <Link
+              to="/signup"
+              className="bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm px-4 py-1.5 rounded-full shadow-md shadow-blue-600/30 transition"
+            >
+              Sign Up
+            </Link>
+          </div>
+        )}
       </div>
+      <Toaster position="top-center" />
     </nav>
   );
 };
