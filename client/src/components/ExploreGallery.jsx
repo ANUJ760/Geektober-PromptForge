@@ -81,6 +81,7 @@ const ExploreGallery = ({ isLoggedIn }) => {
   useEffect(() => {
     setCurrentPage(1);
     fetchCatalog(1, searchTerm);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeCategory, activeModel, activePricing, activeSort, isLoggedIn]);
 
   // Handle Search Input with 350ms debounce
