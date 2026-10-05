@@ -11,7 +11,9 @@ const isConfigured = Boolean(
   key_id &&
   key_secret &&
   !key_id.includes('yourKeyId') &&
-  !key_secret.includes('yourKeySecret')
+  !key_secret.includes('yourKeySecret') &&
+  !key_id.includes('simKey') &&
+  !key_secret.includes('mock_secret')
 );
 
 let razorpayInstance = null;
