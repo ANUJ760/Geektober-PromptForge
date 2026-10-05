@@ -6,6 +6,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
 import promptRoutes from './routes/promptRoutes.js';
+import orderRoutes from './routes/orderRoutes.js';
 import connectDB from './utils/connectDB.js';
 import errorHandler from './middlewares/errorHandler.js';
 
@@ -60,10 +61,13 @@ app.get('/api/v1/health', (req, res) => {
 app.use('/api/v1/users', authRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/prompts', promptRoutes);
+app.use('/api/v1/orders', orderRoutes);
+app.use('/api/v1/payments', orderRoutes);
 
 // Backward Compatibility Routes
 app.use('/users', authRoutes);
 app.use('/prompts', promptRoutes);
+app.use('/orders', orderRoutes);
 
 app.get('/', (req, res) => {
   res.send('PromptForge API is running...');

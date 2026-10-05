@@ -51,13 +51,20 @@ export default function PromptPage({isLoggedIn}) {
         <>
             <Navbar isLoggedIn={isLoggedIn}/>
             <Prompt 
+                id={promptData._id || id}
                 isLoggedIn={isLoggedIn}
                 imageSrc={promptData.imageUrl} 
                 title={promptData.title}
+                description={promptData.description}
                 category={promptData.category}
+                aiModel={promptData.aiModel}
+                pricePaise={promptData.pricePaise}
+                isUnlocked={promptData.isUnlocked}
                 likes={promptData.likes}
                 updatedOn={promptData.updatedAt}
                 promptText={promptData.promptText} 
+                negativePrompt={promptData.negativePrompt}
+                seed={promptData.seed}
                 author={promptData.author || "Anonymous"}
             />
             <Footer />

@@ -41,9 +41,14 @@ const Navbar = ({ isLoggedIn }) => {
           Create
         </button>
         {isLoggedIn && (
-          <Link to="/profile" className="hover:text-white transition">
-            My Profile
-          </Link>
+          <>
+            <Link to="/orders" className="hover:text-white transition">
+              My Purchases
+            </Link>
+            <Link to="/profile" className="hover:text-white transition">
+              My Profile
+            </Link>
+          </>
         )}
       </div>
 
