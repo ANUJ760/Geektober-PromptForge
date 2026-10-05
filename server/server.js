@@ -7,6 +7,8 @@ import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes.js';
 import promptRoutes from './routes/promptRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
+import reviewRoutes from './routes/reviewRoutes.js';
+import creatorRoutes from './routes/creatorRoutes.js';
 import connectDB from './utils/connectDB.js';
 import errorHandler from './middlewares/errorHandler.js';
 
@@ -63,6 +65,8 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/prompts', promptRoutes);
 app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/payments', orderRoutes);
+app.use('/api/v1/reviews', reviewRoutes);
+app.use('/api/v1/creator', creatorRoutes);
 
 // Backward Compatibility Routes
 app.use('/users', authRoutes);

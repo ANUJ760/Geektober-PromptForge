@@ -1,5 +1,16 @@
-import { useState } from 'react';
-import { Heart, Copy, Share2, CornerUpLeft, Lock, Unlock, ShieldCheck, Sparkles, CheckCircle2 } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import {
+  Heart,
+  Copy,
+  Share2,
+  CornerUpLeft,
+  Lock,
+  ShieldCheck,
+  Sparkles,
+  CheckCircle2,
+  Star,
+  MessageSquare,
+} from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { initiateCheckout } from '../utils/razorpay';
@@ -15,9 +26,36 @@ const Prompt = (props) => {
   const [isLiked, setIsLiked] = useState(props.isLiked || false);
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
+  // Reviews State
+  const [reviews, setReviews] = useState([]);
+  const [averageRating, setAverageRating] = useState(props.averageRating || 0);
+  const [reviewsCount, setReviewsCount] = useState(props.reviewsCount || 0);
+  const [newRating, setNewRating] = useState(5);
+  const [newComment, setNewComment] = useState('');
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+
   const pricePaise = props.pricePaise || 0;
   const isFree = pricePaise === 0;
   const priceDisplay = isFree ? 'FREE' : `₹${(pricePaise / 100).toFixed(0)}`;
+
+  useEffect(() => {
+    if (props.id) {
+      const fetchReviews = async () => {
+        try {
+          const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+          const res = await fetch(`${baseUrl}/reviews/prompt/${props.id}`);
+          const data = await res.json();
+          if (data.success) {
+            setReviews(data.reviews || []);
+            setReviewsCount(data.count || 0);
+          }
+        } catch (err) {
+          console.error('Failed to load reviews:', err);
+        }
+      };
+      fetchReviews();
+    }
+  }, [props.id]);
 
   const handleCopy = async () => {
     try {
@@ -72,7 +110,6 @@ const Prompt = (props) => {
     initiateCheckout({
       promptId: props.id,
       promptTitle: props.title,
-      pricePaise,
       onSuccess: (result) => {
         setIsUnlocked(true);
         if (result.fullPromptText) {
@@ -88,9 +125,50 @@ const Prompt = (props) => {
     });
   };
 
+  const handleReviewSubmit = async (e) => {
+    e.preventDefault();
+    if (!newComment.trim()) {
+      toast.error('Please write a review comment');
+      return;
+    }
+
+    setIsSubmittingReview(true);
+    try {
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api/v1';
+      const res = await fetch(`${baseUrl}/reviews`, {
+        method: 'POST',
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          promptId: props.id,
+          rating: newRating,
+          comment: newComment,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        toast.success('Review posted successfully!');
+        setReviews([data.review, ...reviews]);
+        if (data.averageRating) setAverageRating(data.averageRating);
+        setReviewsCount(reviewsCount + 1);
+        setNewComment('');
+      } else {
+        toast.error(data.message || 'Failed to submit review');
+      }
+    } catch (err) {
+      console.error('Error submitting review:', err);
+      toast.error('Network error during review submission');
+    } finally {
+      setIsSubmittingReview(false);
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-[#070B16] flex items-center justify-center p-4 sm:p-8">
-      <div className="w-full max-w-6xl flex flex-col lg:flex-row bg-[#10172A] rounded-3xl shadow-2xl overflow-hidden border border-white/10">
+    <div className="min-h-screen bg-[#070B16] text-white flex flex-col items-center p-4 sm:p-8">
+      <div className="w-full max-w-6xl flex flex-col lg:flex-row bg-[#10172A] rounded-3xl shadow-2xl overflow-hidden border border-white/10 mb-8">
         {/* Left Column: Image Sample */}
         <div className="relative lg:w-3/5 bg-gray-950 flex flex-col p-6 items-center justify-center">
           <button
@@ -155,14 +233,18 @@ const Prompt = (props) => {
               {props.title}
             </h1>
 
-            <p className="text-sm text-gray-400 mb-4">
-              Created by <span className="text-blue-400 font-semibold">@{props.author || 'Anonymous'}</span>
-              {props.updatedOn && (
-                <span className="text-gray-500 ml-2">
-                  • {new Date(props.updatedOn).toLocaleDateString()}
-                </span>
+            <div className="flex items-center space-x-3 text-sm text-gray-400 mb-4">
+              <span>
+                By <span className="text-blue-400 font-semibold">@{props.author || 'Anonymous'}</span>
+              </span>
+              {averageRating > 0 && (
+                <div className="flex items-center space-x-1 text-amber-400 font-bold">
+                  <Star size={13} className="fill-amber-400" />
+                  <span>{averageRating}</span>
+                  <span className="text-gray-500 text-xs font-normal">({reviewsCount})</span>
+                </div>
               )}
-            </p>
+            </div>
 
             <div className="bg-[#10172A] p-4 rounded-xl border border-white/5 mb-6 text-sm text-gray-300 leading-relaxed">
               {props.description || 'No description provided.'}
@@ -182,7 +264,7 @@ const Prompt = (props) => {
               </div>
 
               <div
-                className={`p-4 rounded-xl border font-mono text-sm leading-relaxed max-h-56 overflow-y-auto ${
+                className={`p-4 rounded-xl border font-mono text-sm leading-relaxed max-h-52 overflow-y-auto ${
                   isUnlocked
                     ? 'bg-[#141E33] border-blue-500/30 text-gray-200'
                     : 'bg-[#10172A]/80 border-amber-500/30 text-amber-200/80 select-none'
@@ -191,7 +273,6 @@ const Prompt = (props) => {
                 {currentPromptText}
               </div>
 
-              {/* Negative Prompt & Seed if unlocked */}
               {isUnlocked && (negativePrompt || seed) && (
                 <div className="mt-3 space-y-2 text-xs bg-[#141E33]/60 p-3 rounded-lg border border-white/5">
                   {negativePrompt && (
@@ -272,6 +353,101 @@ const Prompt = (props) => {
           </div>
         </div>
       </div>
+
+      {/* Verified Reviews Section */}
+      <div className="w-full max-w-6xl bg-[#10172A] rounded-3xl p-6 sm:p-8 border border-white/10 shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center space-x-2">
+            <MessageSquare size={20} className="text-blue-400" />
+            <h2 className="text-xl font-bold">Verified Buyer Reviews ({reviewsCount})</h2>
+          </div>
+        </div>
+
+        {/* Submit Review Form if unlocked */}
+        {isUnlocked && props.isLoggedIn && (
+          <form
+            onSubmit={handleReviewSubmit}
+            className="mb-8 p-5 bg-[#0B1120] rounded-2xl border border-white/5 space-y-4"
+          >
+            <h3 className="text-sm font-bold text-gray-200">Leave a Verified Review</h3>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-gray-400">Rating:</span>
+              <div className="flex items-center space-x-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    type="button"
+                    key={star}
+                    onClick={() => setNewRating(star)}
+                    className="p-1 cursor-pointer focus:outline-none"
+                  >
+                    <Star
+                      size={18}
+                      className={
+                        star <= newRating
+                          ? 'text-amber-400 fill-amber-400'
+                          : 'text-gray-600'
+                      }
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <textarea
+              rows="2"
+              value={newComment}
+              onChange={(e) => setNewComment(e.target.value)}
+              placeholder="How were the prompt generation results? Share parameters or lighting tips..."
+              required
+              className="w-full px-4 py-2.5 rounded-xl bg-[#10172A] border border-white/10 text-white placeholder-gray-500 focus:outline-none focus:border-blue-500 text-sm"
+            ></textarea>
+
+            <button
+              type="submit"
+              disabled={isSubmittingReview}
+              className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl shadow-md transition cursor-pointer disabled:opacity-50"
+            >
+              {isSubmittingReview ? 'Submitting...' : 'Post Review'}
+            </button>
+          </form>
+        )}
+
+        {/* Reviews List */}
+        {reviews.length > 0 ? (
+          <div className="space-y-4">
+            {reviews.map((r) => (
+              <div
+                key={r._id}
+                className="p-4 rounded-xl bg-[#0B1120] border border-white/5 space-y-2 text-sm"
+              >
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <span className="font-bold text-white">@{r.userId?.username || 'Verified Buyer'}</span>
+                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded font-medium">
+                      <ShieldCheck size={12} /> Verified Purchase
+                    </span>
+                  </div>
+                  <div className="flex items-center space-x-0.5 text-amber-400">
+                    {Array.from({ length: r.rating }).map((_, i) => (
+                      <Star key={i} size={13} className="fill-amber-400" />
+                    ))}
+                  </div>
+                </div>
+
+                <p className="text-gray-300 leading-relaxed text-xs sm:text-sm">{r.comment}</p>
+                <p className="text-[11px] text-gray-500">
+                  {new Date(r.createdAt).toLocaleDateString()}
+                </p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500 text-sm">
+            No reviews yet. Be the first verified buyer to rate this prompt!
+          </div>
+        )}
+      </div>
+
       <Toaster position="top-center" />
     </div>
   );

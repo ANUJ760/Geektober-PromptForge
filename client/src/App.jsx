@@ -9,6 +9,7 @@ import Explore from './pages/Explore.jsx';
 import Upload from './pages/Upload.jsx';
 import Profile from './pages/Profile.jsx';
 import Orders from './pages/Orders.jsx';
+import CreatorDashboard from './pages/CreatorDashboard.jsx';
 import checkAuthStatus from './utils/checkAuthStatus.js';
 
 function App() {
@@ -63,6 +64,8 @@ function App() {
       <Route path="/upload" element={<Upload isLoggedIn={isLoggedIn} />} />
       <Route path="/profile" element={<Profile isLoggedIn={isLoggedIn} />} />
       <Route path="/orders" element={<Orders isLoggedIn={isLoggedIn} />} />
+      <Route path="/creator/dashboard" element={<CreatorDashboard isLoggedIn={isLoggedIn} />} />
+      <Route path="/dashboard" element={<CreatorDashboard isLoggedIn={isLoggedIn} />} />
     </Routes>
   );
 }

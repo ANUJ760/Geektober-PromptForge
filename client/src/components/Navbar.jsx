@@ -42,6 +42,9 @@ const Navbar = ({ isLoggedIn }) => {
         </button>
         {isLoggedIn && (
           <>
+            <Link to="/creator/dashboard" className="hover:text-white transition">
+              Creator Hub
+            </Link>
             <Link to="/orders" className="hover:text-white transition">
               My Purchases
             </Link>
