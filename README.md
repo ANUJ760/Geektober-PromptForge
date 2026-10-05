@@ -352,7 +352,9 @@ RAZORPAY_KEY_ID=rzp_test_yourKeyIdHere
 RAZORPAY_KEY_SECRET=yourRazorpayKeySecretHere
 RAZORPAY_WEBHOOK_SECRET=yourWebhookSecretHere
 ALLOWED_ORIGINS=http://localhost:5173
-IMAGE_BB_API_KEY=your_imgbb_or_cloudinary_key
+CLOUDINARY_CLOUD_NAME=yourCloudNameHere
+CLOUDINARY_API_KEY=yourCloudinaryApiKeyHere
+CLOUDINARY_API_SECRET=yourCloudinaryApiSecretHere
 EOF
 
 # Start development server
@@ -392,6 +394,9 @@ Navigate to `http://localhost:5173` in your browser.
 | `RAZORPAY_KEY_SECRET` | Razorpay private secret key | `XXXXXXXXXXXXXXXXXXXXXXXX` |
 | `RAZORPAY_WEBHOOK_SECRET` | Secret configured in Razorpay Webhooks dashboard | `whsec_XXXXXXXXXXXXXXXXXXXX` |
 | `ALLOWED_ORIGINS` | Comma-separated list of CORS whitelisted domains | `http://localhost:5173,https://promptforge.app` |
+| `CLOUDINARY_CLOUD_NAME` | Cloudinary account cloud name | `promptforge_cloud` |
+| `CLOUDINARY_API_KEY` | Cloudinary access API key | `123456789012345` |
+| `CLOUDINARY_API_SECRET` | Cloudinary private secret key | `XXXXXXXXXXXXXXXXXXXXXXXXXXXX` |
 
 ### Frontend (`client/.env`)
 | Variable | Description | Example |
