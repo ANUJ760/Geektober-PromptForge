@@ -61,7 +61,7 @@ const GallerySection = ({ isLoggedIn }) => {
         {currentItems.length > 0 ? (
           currentItems.map((data, index) => (
             <Card 
-              key={index}
+              key={data._id || index}
               id={data._id}
               isLiked={likedPrompts.includes(data._id)}
               imageSrc={data.imageUrl}
@@ -69,6 +69,8 @@ const GallerySection = ({ isLoggedIn }) => {
               likes={data.likes}
               author={data.author || "Anonymous"}
               category={data.category}
+              aiModel={data.aiModel}
+              pricePaise={data.pricePaise}
               isLoggedIn={isLoggedIn}
             />
           ))

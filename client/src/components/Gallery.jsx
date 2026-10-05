@@ -94,6 +94,8 @@ const GallerySection = ({ isLoggedIn }) => {
               likes={data.likes}
               author={data.author || 'Anonymous'}
               category={data.category}
+              aiModel={data.aiModel}
+              pricePaise={data.pricePaise}
               isLiked={likedPrompts.includes(data._id)}
               isLoggedIn={isLoggedIn}
               onImageLoad={handleImageLoad}
