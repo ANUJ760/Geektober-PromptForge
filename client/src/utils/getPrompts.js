@@ -58,10 +58,18 @@ export async function getAllPrompts(params = {}) {
 }
 
 export async function getProfilePrompts() {
-  const response = await fetch(`${getBaseUrl()}/prompts/getProfilePrompts`, {
-    method: 'GET',
-    credentials: 'include',
-  });
-  const data = await response.json();
-  return data;
+  try {
+    const response = await fetch(`${getBaseUrl()}/prompts/getProfilePrompts`, {
+      method: 'GET',
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      return [];
+    }
+    const data = await response.json();
+    return Array.isArray(data) ? data : (data?.data || data?.prompts || []);
+  } catch (err) {
+    console.error('Failed to fetch profile prompts:', err);
+    return [];
+  }
 }

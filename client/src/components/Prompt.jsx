@@ -92,10 +92,15 @@ const Prompt = (props) => {
     }
     try {
       const data = await updateLike(isLiked, props.id);
-      setIsLiked(!isLiked);
-      setLikes(data.prompt?.likes ?? (isLiked ? likes - 1 : likes + 1));
+      if (data && data.success) {
+        setIsLiked(!isLiked);
+        setLikes(data.prompt?.likes ?? (isLiked ? likes - 1 : likes + 1));
+      } else {
+        toast.error(data?.error || data?.message || 'Failed to update like');
+      }
     } catch (err) {
       console.error(err);
+      toast.error('Network error updating like');
     }
   };
 

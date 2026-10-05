@@ -36,10 +36,15 @@ const Card = ({
 
     try {
       const data = await updateLike(isLiked, id);
-      setIsLiked(!isLiked);
-      setLikeCount(data.prompt?.likes ?? likeCount + (isLiked ? -1 : 1));
+      if (data && data.success) {
+        setIsLiked(!isLiked);
+        setLikeCount(data.prompt?.likes ?? (isLiked ? likeCount - 1 : likeCount + 1));
+      } else {
+        toast.error(data?.error || data?.message || 'Failed to update like');
+      }
     } catch (err) {
       console.error('Like toggle error:', err);
+      toast.error('Network error updating like');
     }
   }
 
