@@ -8,10 +8,12 @@ describe('Cloudinary Media Upload Pipeline Suite', () => {
   });
 
   it('should return a valid image URL when a file buffer is supplied', async () => {
+    // Valid 1x1 transparent GIF buffer so both live Cloudinary validation and mock modes succeed
+    const valid1x1GifBase64 = 'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
     const mockFile = {
-      buffer: Buffer.from('fake_image_bytes_content_for_test'),
-      mimetype: 'image/jpeg',
-      originalname: 'cyber_samurai.jpg',
+      buffer: Buffer.from(valid1x1GifBase64, 'base64'),
+      mimetype: 'image/gif',
+      originalname: 'cyber_samurai.gif',
     };
 
     const url = await getImageUrl(mockFile);

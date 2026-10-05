@@ -406,6 +406,34 @@ Navigate to `http://localhost:5173` in your browser.
 
 ---
 
+## Razorpay Webhook Configuration & Local Testing
+
+### 1. Dashboard Settings
+Navigate to **Razorpay Dashboard** (in **Test Mode**) → **Account & Settings** → **Webhooks** → **+ Add New Webhook**:
+* **Webhook URL**:
+  * **Production**: `https://<your-api-domain>/api/v1/payments/webhook`
+  * **Local Development**: `https://<your-ngrok-subdomain>.ngrok-free.app/api/v1/payments/webhook`
+* **Secret**: The exact secret string matching `RAZORPAY_WEBHOOK_SECRET` in your `server/.env`.
+* **Alert Email**: Your developer email address for delivery notifications.
+* **Active Events**: Select only:
+  1. `payment.captured` *(Fired on successful settlement; unlocks prompt and credits seller)*
+  2. `payment.failed` *(Fired on declined payments; marks order as FAILED)*
+  3. `order.paid` *(Secondary idempotent settlement guarantee)*
+
+### 2. Testing Webhooks Locally with ngrok
+Because Razorpay's servers cannot reach `http://localhost:3000`, use a tunnel:
+```bash
+# 1. Start tunnel to your local backend port
+npx ngrok http 3000
+
+# 2. Copy the generated HTTPS forwarding URL (e.g., https://abcd-1234.ngrok-free.app)
+# 3. In Razorpay Webhook settings, set Webhook URL to:
+#    https://abcd-1234.ngrok-free.app/api/v1/payments/webhook
+# 4. In Razorpay Dashboard, click "Send Test Webhook" to verify 200 OK delivery.
+```
+
+---
+
 ## Verification & Testing Suite
 
 PromptForge includes automated test suites covering unit logic, cryptographic signatures, and end-to-end integration workflows:

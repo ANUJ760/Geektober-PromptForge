@@ -10,14 +10,25 @@ export async function handleRazorpayWebhook(req, res) {
     const signature = req.headers['x-razorpay-signature'];
 
     // Verify webhook signature if secret configured
-    if (webhookSecret && signature) {
+    if (webhookSecret) {
+      if (!signature) {
+        console.warn('Webhook received without x-razorpay-signature header');
+        return res.status(400).json({ success: false, message: 'Missing x-razorpay-signature header' });
+      }
+
       const rawBody = req.rawBody ? req.rawBody.toString('utf-8') : JSON.stringify(req.body);
       const expectedSignature = crypto
         .createHmac('sha256', webhookSecret)
         .update(rawBody)
         .digest('hex');
 
-      if (signature !== expectedSignature) {
+      const signatureBuffer = Buffer.from(signature, 'utf-8');
+      const expectedBuffer = Buffer.from(expectedSignature, 'utf-8');
+
+      if (
+        signatureBuffer.length !== expectedBuffer.length ||
+        !crypto.timingSafeEqual(signatureBuffer, expectedBuffer)
+      ) {
         console.warn('Webhook signature mismatch detected');
         return res.status(400).json({ success: false, message: 'Invalid webhook signature' });
       }
