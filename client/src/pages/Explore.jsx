@@ -1,11 +1,13 @@
-import Navbar from "../components/Navbar"
-import Gallery from "../components/ExploreGallery"
+import Navbar from '../components/Navbar';
+import ExploreGallery from '../components/ExploreGallery';
+import Footer from '../components/Footer';
 
-export default function Home({isLoggedIn}) {
-    return (
-        <>
-            <Navbar isLoggedIn={isLoggedIn}/>
-            <Gallery isLoggedIn={isLoggedIn}/>
-        </>
-    )
+export default function Explore({ isLoggedIn }) {
+  return (
+    <>
+      <Navbar isLoggedIn={isLoggedIn} />
+      <ExploreGallery isLoggedIn={isLoggedIn} />
+      <Footer />
+    </>
+  );
 }
