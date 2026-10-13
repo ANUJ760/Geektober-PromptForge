@@ -468,6 +468,31 @@ npm run test:coverage
 
 ---
 
+## 🚀 Deployment Guide
+
+PromptForge is configured for frictionless cloud deployment:
+* **Frontend**: Vercel (React 19 SPA with automatic rewrite rules)
+* **Backend**: Render (Express 5.1 Native ESM modular monolith)
+
+For full step-by-step instructions, environment variable tables, and troubleshooting, read the **[Full-Stack Deployment Guide](DEPLOYMENT_GUIDE.md)**.
+
+---
+
+## 🎯 Contributor Sprint & College Hackathon Issues
+
+Looking to contribute to PromptForge? We have curated 7 **Medium** and **Hard** difficulty issues designed specifically for developer sprints and hackathons:
+
+* Browse the **[Issues Catalog (issues/)](issues/README.md)**:
+  * **[Issue #1](issues/issue-1.md)**: Migrate to Modern React Router v7 Architecture *(Medium, `refactor`/`feat`)*
+  * **[Issue #2](issues/issue-2.md)**: Tiered Rate Limiting & Anti-Brute-Force Protection *(Medium, `feat`)*
+  * **[Issue #3](issues/issue-3.md)**: Universal Request Validation with Zod Middleware *(Medium, `fix`)*
+  * **[Issue #4](issues/issue-4.md)**: Concurrency-Safe Optimistic Liking with Atomic Counters *(Medium, `fix`/`feat`)*
+  * **[Issue #5](issues/issue-5.md)**: Real-Time Payment Entitlements via Server-Sent Events *(Hard, `feat`)*
+  * **[Issue #6](issues/issue-6.md)**: Atomic Financial Settlement Ledger with Mongoose Transactions *(Hard, `fix`)*
+  * **[Issue #7](issues/issue-7.md)**: Creator Analytics Time-Series Aggregations & CSV Export *(Hard, `feat`)*
+
+---
+
 ## License
 
 This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.

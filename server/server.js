@@ -15,11 +15,7 @@ import errorHandler from './middlewares/errorHandler.js';
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const defaultAllowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
-  'https://test-smp-4otr.vercel.app',
-];
+const defaultAllowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
@@ -28,7 +24,6 @@ const allowedOrigins = process.env.ALLOWED_ORIGINS
 app.use(
   cors({
     origin: (origin, callback) => {
-      // Allow requests with no origin (like mobile apps, curl, Postman)
       if (!origin || allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
