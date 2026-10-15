@@ -487,8 +487,3 @@ npm run test:coverage
    - _Rationale_: Instead of storing purchased prompt IDs in an unbounded array on the user document (which risks hitting MongoDB's 16MB document limit), entitlements are stored as individual relational documents with a unique compound index (`userId + promptId`), facilitating $O(1)$ indexed lookup and clean audit logging.
 
 ---
-
-
-## License
-
-This project is licensed under the MIT License — see the [LICENSE](LICENSE) file for details.
