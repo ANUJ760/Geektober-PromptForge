@@ -14,7 +14,7 @@ import {
 import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { initiateCheckout } from '../utils/razorpay';
-import { updateLike } from '../utils/like';
+import useLikeToggle from '../hooks/useLikeToggle';
 
 const Prompt = (props) => {
   const navigate = useNavigate();
@@ -22,8 +22,11 @@ const Prompt = (props) => {
   const [currentPromptText, setCurrentPromptText] = useState(props.promptText || '');
   const [negativePrompt, setNegativePrompt] = useState(props.negativePrompt || '');
   const [seed, setSeed] = useState(props.seed || '');
-  const [likes, setLikes] = useState(props.likes || 0);
-  const [isLiked, setIsLiked] = useState(props.isLiked || false);
+  const { isLiked, likeCount, isBouncing, toggleLike } = useLikeToggle({
+    id: props.id,
+    isLiked: props.isLiked || false,
+    likes: props.likes || 0,
+  });
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   // Reviews State
@@ -84,24 +87,14 @@ const Prompt = (props) => {
     }
   };
 
-  const handleLike = async () => {
+  const handleLike = () => {
     if (!props.isLoggedIn) {
       toast.error('Log in to like prompts!');
       setTimeout(() => navigate('/login'), 800);
       return;
     }
-    try {
-      const data = await updateLike(isLiked, props.id);
-      if (data && data.success) {
-        setIsLiked(!isLiked);
-        setLikes(data.prompt?.likes ?? (isLiked ? likes - 1 : likes + 1));
-      } else {
-        toast.error(data?.error || data?.message || 'Failed to update like');
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error('Network error updating like');
-    }
+
+    toggleLike();
   };
 
   const handleBuyPrompt = () => {
@@ -341,9 +334,11 @@ const Prompt = (props) => {
               >
                 <Heart
                   size={18}
-                  className={isLiked ? 'text-red-500 fill-red-500' : 'text-gray-400'}
+                  className={`transition-transform duration-150 ${
+                    isBouncing ? 'scale-125' : 'scale-100'
+                  } ${isLiked ? 'text-red-500 fill-red-500' : 'text-gray-400'}`}
                 />
-                <span className="text-sm font-semibold text-white">{likes}</span>
+                <span className="text-sm font-semibold text-white">{likeCount}</span>
                 <span className="text-xs text-gray-400">Likes</span>
               </button>
 
