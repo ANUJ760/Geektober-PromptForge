@@ -1,8 +1,7 @@
-import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast, { Toaster } from 'react-hot-toast';
 import { Sparkles, Eye } from 'lucide-react';
-import { updateLike } from '../utils/like';
+import useLikeToggle from '../hooks/useLikeToggle';
 
 const Card = ({
   id,
@@ -18,15 +17,13 @@ const Card = ({
   onImageLoad,
 }) => {
   const navigate = useNavigate();
-  const [isLiked, setIsLiked] = useState(initialLiked);
-  const [likeCount, setLikeCount] = useState(likes);
+  const { isLiked, likeCount, isBouncing, toggleLike } = useLikeToggle({
+    id,
+    isLiked: initialLiked,
+    likes,
+  });
 
-  useEffect(() => {
-    setIsLiked(initialLiked);
-    setLikeCount(likes);
-  }, [initialLiked, likes]);
-
-  async function handleLikeClick(e) {
+  function handleLikeClick(e) {
     e.stopPropagation();
     if (!isLoggedIn) {
       toast.error('Log in to like prompts!');
@@ -34,18 +31,7 @@ const Card = ({
       return;
     }
 
-    try {
-      const data = await updateLike(isLiked, id);
-      if (data && data.success) {
-        setIsLiked(!isLiked);
-        setLikeCount(data.prompt?.likes ?? (isLiked ? likeCount - 1 : likeCount + 1));
-      } else {
-        toast.error(data?.error || data?.message || 'Failed to update like');
-      }
-    } catch (err) {
-      console.error('Like toggle error:', err);
-      toast.error('Network error updating like');
-    }
+    toggleLike();
   }
 
   const isFree = !pricePaise || pricePaise === 0;
@@ -86,7 +72,11 @@ const Card = ({
             onClick={handleLikeClick}
             className="flex items-center bg-black/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10 hover:scale-105 transition cursor-pointer"
           >
-            <span className={`mr-1 text-sm ${isLiked ? 'text-red-500' : 'text-gray-400'}`}>
+            <span
+              className={`mr-1 inline-block text-sm transition-transform duration-150 ${
+                isBouncing ? 'scale-125' : 'scale-100'
+              } ${isLiked ? 'text-red-500' : 'text-gray-400'}`}
+            >
               ♥
             </span>
             <span className="text-xs text-white font-medium">{likeCount}</span>

@@ -3,6 +3,7 @@ dotenv.config();
 
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
 import Users from '../models/user.js';
 import Prompt from '../models/prompt.js';
 
@@ -152,25 +153,42 @@ export async function getUserId(req, res) {
   }
 }
 
+// Reports the current like state when a like/unlike changed nothing, without touching the counter
+async function sendUnchangedLikeState(res, userId, promptId, isLiked) {
+  const userExists = await Users.exists({ _id: userId });
+  if (!userExists) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  const prompt = await Prompt.findById(promptId);
+  if (!prompt) {
+    return res.status(404).json({ error: 'Prompt not found' });
+  }
+
+  return res.json({ success: true, isLiked, prompt });
+}
+
 export async function addLike(req, res) {
   try {
     const promptId = req.body.promptId;
-    const userId = req.user?.id || req.body.userId;
+    const userId = req.user?.id;
 
-    if (!promptId) {
-      return res.status(400).json({ success: false, error: 'Prompt ID is required' });
+    if (!promptId || !mongoose.isValidObjectId(promptId)) {
+      return res.status(400).json({ success: false, error: 'Valid prompt ID is required' });
     }
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Authentication required to like' });
     }
 
-    const updatedUser = await Users.findByIdAndUpdate(
-      userId,
+    // The filter makes the check and the write one atomic operation: only one of
+    // several concurrent requests matches, so the counter is incremented once per user
+    const updatedUser = await Users.findOneAndUpdate(
+      { _id: userId, likedPrompts: { $ne: promptId } },
       { $addToSet: { likedPrompts: promptId } },
       { new: true }
     );
     if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
+      return sendUnchangedLikeState(res, userId, promptId, true);
     }
 
     const updatedPrompt = await Prompt.findByIdAndUpdate(
@@ -179,11 +197,14 @@ export async function addLike(req, res) {
       { new: true }
     );
     if (!updatedPrompt) {
+      // Undo the user-side change so a like is never recorded for a missing prompt
+      await Users.updateOne({ _id: userId }, { $pull: { likedPrompts: promptId } });
       return res.status(404).json({ error: 'Prompt not found' });
     }
 
     return res.json({
       success: true,
+      isLiked: true,
       prompt: updatedPrompt,
     });
   } catch (err) {
@@ -194,35 +215,43 @@ export async function addLike(req, res) {
 export async function removeLike(req, res) {
   try {
     const promptId = req.body.promptId;
-    const userId = req.user?.id || req.body.userId;
+    const userId = req.user?.id;
 
-    if (!promptId) {
-      return res.status(400).json({ success: false, error: 'Prompt ID is required' });
+    if (!promptId || !mongoose.isValidObjectId(promptId)) {
+      return res.status(400).json({ success: false, error: 'Valid prompt ID is required' });
     }
     if (!userId) {
       return res.status(401).json({ success: false, error: 'Authentication required to unlike' });
     }
 
-    const updatedUser = await Users.findByIdAndUpdate(
-      userId,
+    const updatedUser = await Users.findOneAndUpdate(
+      { _id: userId, likedPrompts: promptId },
       { $pull: { likedPrompts: promptId } },
       { new: true }
     );
     if (!updatedUser) {
-      return res.status(404).json({ error: 'User not found' });
+      return sendUnchangedLikeState(res, userId, promptId, false);
     }
 
-    const updatedPrompt = await Prompt.findByIdAndUpdate(
-      promptId,
+    // The filter keeps the counter from dropping below zero; a null result is either
+    // a prompt already at zero or a missing prompt, which the fallback lookup tells apart
+    let updatedPrompt = await Prompt.findOneAndUpdate(
+      { _id: promptId, likes: { $gt: 0 } },
       { $inc: { likes: -1 } },
       { new: true }
     );
     if (!updatedPrompt) {
-      return res.status(404).json({ error: 'Prompt not found' });
+      updatedPrompt = await Prompt.findById(promptId);
+      if (!updatedPrompt) {
+        // Restore the user-side change so the unlike is not recorded for a missing prompt
+        await Users.updateOne({ _id: userId }, { $addToSet: { likedPrompts: promptId } });
+        return res.status(404).json({ error: 'Prompt not found' });
+      }
     }
 
     return res.json({
       success: true,
+      isLiked: false,
       prompt: updatedPrompt,
     });
   } catch (err) {
@@ -232,7 +261,7 @@ export async function removeLike(req, res) {
 
 export async function likeList(req, res) {
   try {
-    const userId = req.user?.id || req.body.userId;
+    const userId = req.user?.id;
     if (!userId) {
       return res.json({ likedPrompts: [] });
     }
