@@ -11,10 +11,15 @@ import Profile from './pages/Profile.jsx';
 import Orders from './pages/Orders.jsx';
 import CreatorDashboard from './pages/CreatorDashboard.jsx';
 import checkAuthStatus from './utils/checkAuthStatus.js';
+import useNotificationStream from './hooks/useNotificationStream.js';
+import { Toaster } from 'react-hot-toast';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+
+  // Maintain active SSE notification stream when authenticated
+  useNotificationStream({ isLoggedIn });
 
   const handleSetIsLoggedIn = (status) => {
     setIsLoggedIn(status);
@@ -53,20 +58,23 @@ function App() {
   }
 
   return (
-    <Routes>
-      <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
-      <Route path="/home" element={<Home isLoggedIn={isLoggedIn} />} />
-      <Route path="/login" element={<Login setIsLoggedIn={handleSetIsLoggedIn} />} />
-      <Route path="/signup" element={<Signup setIsLoggedIn={handleSetIsLoggedIn} />} />
-      <Route path="/logout" element={<LogOut setIsLoggedIn={handleSetIsLoggedIn} />} />
-      <Route path="/prompt/:id" element={<Prompt isLoggedIn={isLoggedIn} />} />
-      <Route path="/explore" element={<Explore isLoggedIn={isLoggedIn} />} />
-      <Route path="/upload" element={<Upload isLoggedIn={isLoggedIn} />} />
-      <Route path="/profile" element={<Profile isLoggedIn={isLoggedIn} />} />
-      <Route path="/orders" element={<Orders isLoggedIn={isLoggedIn} />} />
-      <Route path="/creator/dashboard" element={<CreatorDashboard isLoggedIn={isLoggedIn} />} />
-      <Route path="/dashboard" element={<CreatorDashboard isLoggedIn={isLoggedIn} />} />
-    </Routes>
+    <>
+      <Toaster position="top-right" />
+      <Routes>
+        <Route path="/" element={<Home isLoggedIn={isLoggedIn} />} />
+        <Route path="/home" element={<Home isLoggedIn={isLoggedIn} />} />
+        <Route path="/login" element={<Login setIsLoggedIn={handleSetIsLoggedIn} />} />
+        <Route path="/signup" element={<Signup setIsLoggedIn={handleSetIsLoggedIn} />} />
+        <Route path="/logout" element={<LogOut setIsLoggedIn={handleSetIsLoggedIn} />} />
+        <Route path="/prompt/:id" element={<Prompt isLoggedIn={isLoggedIn} />} />
+        <Route path="/explore" element={<Explore isLoggedIn={isLoggedIn} />} />
+        <Route path="/upload" element={<Upload isLoggedIn={isLoggedIn} />} />
+        <Route path="/profile" element={<Profile isLoggedIn={isLoggedIn} />} />
+        <Route path="/orders" element={<Orders isLoggedIn={isLoggedIn} />} />
+        <Route path="/creator/dashboard" element={<CreatorDashboard isLoggedIn={isLoggedIn} />} />
+        <Route path="/dashboard" element={<CreatorDashboard isLoggedIn={isLoggedIn} />} />
+      </Routes>
+    </>
   );
 }
 

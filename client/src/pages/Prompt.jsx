@@ -27,6 +27,26 @@ export default function PromptPage({isLoggedIn}) {
         }
     }, [id]);
 
+    useEffect(() => {
+        const handlePaymentSuccess = (e) => {
+            const eventPromptId = e.detail?.promptId;
+            if (id && eventPromptId && eventPromptId.toString() === id.toString()) {
+                getPromptById(id)
+                    .then(data => {
+                        if (data) {
+                            setPromptData(data);
+                        }
+                    })
+                    .catch(err => console.error("Failed to auto-refresh prompt in page:", err));
+            }
+        };
+
+        window.addEventListener('promptforge:payment_success', handlePaymentSuccess);
+        return () => {
+            window.removeEventListener('promptforge:payment_success', handlePaymentSuccess);
+        };
+    }, [id]);
+
     if (isLoading) {
         return (
             <>

@@ -3,6 +3,7 @@ import Order from '../models/order.js';
 import Prompt from '../models/prompt.js';
 import Entitlement from '../models/entitlement.js';
 import Users from '../models/user.js';
+import eventBus from '../utils/eventBus.js';
 
 export async function handleRazorpayWebhook(req, res) {
   try {
@@ -67,7 +68,11 @@ export async function handleRazorpayWebhook(req, res) {
             { upsert: true, new: true }
           );
 
-          await Prompt.findByIdAndUpdate(order.promptId, { $inc: { salesCount: 1 } });
+          const prompt = await Prompt.findByIdAndUpdate(
+            order.promptId,
+            { $inc: { salesCount: 1 } },
+            { new: true }
+          );
 
           if (order.sellerId && order.amountPaise > 0) {
             const netCreatorPaise = Math.round(order.amountPaise * 0.9);
@@ -75,6 +80,16 @@ export async function handleRazorpayWebhook(req, res) {
               $inc: { creatorBalancePaise: netCreatorPaise },
             });
           }
+
+          eventBus.broadcastToUser(order.buyerId, {
+            event: 'PAYMENT_SUCCESS',
+            data: {
+              orderId: order._id.toString(),
+              promptId: order.promptId.toString(),
+              title: prompt?.title || 'Purchased Prompt',
+              message: 'Payment verified! Full prompt and parameters are now unlocked.',
+            },
+          });
         }
       }
     } else if (event === 'payment.failed') {
