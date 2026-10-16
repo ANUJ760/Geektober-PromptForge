@@ -15,6 +15,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { useNavigate } from 'react-router-dom';
 import { initiateCheckout } from '../utils/razorpay';
 import { updateLike } from '../utils/like';
+import { getPromptById } from '../utils/getPrompts.js';
 
 const Prompt = (props) => {
   const navigate = useNavigate();
@@ -55,6 +56,48 @@ const Prompt = (props) => {
       };
       fetchReviews();
     }
+  }, [props.id]);
+
+  // Sync state whenever props change from parent re-fetch
+  useEffect(() => {
+    if (props.isUnlocked !== undefined) {
+      setIsUnlocked(props.isUnlocked);
+    }
+    if (props.promptText) {
+      setCurrentPromptText(props.promptText);
+    }
+    if (props.negativePrompt !== undefined) {
+      setNegativePrompt(props.negativePrompt);
+    }
+    if (props.seed !== undefined) {
+      setSeed(props.seed);
+    }
+  }, [props.isUnlocked, props.promptText, props.negativePrompt, props.seed]);
+
+  // Real-time instant unlock via SSE PAYMENT_SUCCESS event
+  useEffect(() => {
+    const handlePaymentUnlock = async (event) => {
+      const eventPromptId = event.detail?.promptId;
+      if (props.id && eventPromptId && eventPromptId.toString() === props.id.toString()) {
+        try {
+          const data = await getPromptById(props.id);
+          if (data && (data.isUnlocked || data.fullPromptText)) {
+            setIsUnlocked(true);
+            const unmaskedText = data.fullPromptText || data.promptText;
+            if (unmaskedText) setCurrentPromptText(unmaskedText);
+            if (data.negativePrompt !== undefined) setNegativePrompt(data.negativePrompt);
+            if (data.seed !== undefined) setSeed(data.seed);
+          }
+        } catch (err) {
+          console.error('Failed to auto-refresh unlocked prompt data:', err);
+        }
+      }
+    };
+
+    window.addEventListener('promptforge:payment_success', handlePaymentUnlock);
+    return () => {
+      window.removeEventListener('promptforge:payment_success', handlePaymentUnlock);
+    };
   }, [props.id]);
 
   const handleCopy = async () => {

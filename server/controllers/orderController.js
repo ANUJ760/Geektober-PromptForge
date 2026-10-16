@@ -4,6 +4,7 @@ import Users from '../models/user.js';
 import Order from '../models/order.js';
 import Entitlement from '../models/entitlement.js';
 import { createRazorpayOrder, verifyRazorpaySignature } from '../config/razorpay.js';
+import eventBus from '../utils/eventBus.js';
 
 export async function createOrder(req, res) {
   try {
@@ -53,6 +54,16 @@ export async function createOrder(req, res) {
       });
 
       await Prompt.findByIdAndUpdate(prompt._id, { $inc: { salesCount: 1 } });
+
+      eventBus.broadcastToUser(buyerId, {
+        event: 'PAYMENT_SUCCESS',
+        data: {
+          orderId: freeOrder._id.toString(),
+          promptId: prompt._id.toString(),
+          title: prompt.title,
+          message: 'Payment verified! Full prompt and parameters are now unlocked.',
+        },
+      });
 
       return res.status(200).json({
         success: true,
@@ -181,6 +192,17 @@ export async function verifyPayment(req, res) {
         $inc: { creatorBalancePaise: netCreatorPaise },
       });
     }
+
+    // Broadcast real-time PAYMENT_SUCCESS event via eventBus
+    eventBus.broadcastToUser(buyerId, {
+      event: 'PAYMENT_SUCCESS',
+      data: {
+        orderId: order._id.toString(),
+        promptId: prompt._id.toString(),
+        title: prompt.title,
+        message: 'Payment verified! Full prompt and parameters are now unlocked.',
+      },
+    });
 
     return res.status(200).json({
       success: true,

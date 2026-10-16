@@ -9,13 +9,14 @@ import promptRoutes from './routes/promptRoutes.js';
 import orderRoutes from './routes/orderRoutes.js';
 import reviewRoutes from './routes/reviewRoutes.js';
 import creatorRoutes from './routes/creatorRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import connectDB from './utils/connectDB.js';
 import errorHandler from './middlewares/errorHandler.js';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const defaultAllowedOrigins = process.env.ALLOWED_ORIGINS.split(',');
+const defaultAllowedOrigins = ['http://localhost:5173', 'http://localhost:3000'];
 
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim())
@@ -62,11 +63,13 @@ app.use('/api/v1/orders', orderRoutes);
 app.use('/api/v1/payments', orderRoutes);
 app.use('/api/v1/reviews', reviewRoutes);
 app.use('/api/v1/creator', creatorRoutes);
+app.use('/api/v1/notifications', notificationRoutes);
 
 // Backward Compatibility Routes
 app.use('/users', authRoutes);
 app.use('/prompts', promptRoutes);
 app.use('/orders', orderRoutes);
+app.use('/notifications', notificationRoutes);
 
 app.get('/', (req, res) => {
   res.send('PromptForge API is running...');
